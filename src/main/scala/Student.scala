@@ -119,7 +119,6 @@ object Student {
 
   }
 
-  //TODO: Remove All of this shit and create an new update query
   def update(id: Int, firstName: String, lastName: String): Unit = {
     val updateStudentQuery = "UPDATE Student SET FirstName = ?, LastName = ? WHERE StudentID = ?"
     var    preparedStatement = connection.prepareStatement(updateStudentQuery)

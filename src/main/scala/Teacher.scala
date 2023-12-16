@@ -2,7 +2,8 @@ import SchoolManagementSystem.connection
 import Student.statement
 
 import java.io.{File, FileWriter, PrintWriter}
-import java.sql.SQLException
+import java.sql.{PreparedStatement, SQLException, Statement}
+import javax.swing.UIManager.getInt
 import scala.io.Source
 import scala.util.control.Breaks.break
 
@@ -63,41 +64,79 @@ object Teacher {
 
 
 
-  def create(id: Int, name: String, subject: String): Unit = {
-    val writer = new FileWriter("teachers.txt", true)
-    writer.write(s"$id,$name,$subject\n")
-    writer.close()
-    println("Teacher Created Successfully")
+  def create(firstName: String, lastName: String,courseName:String): Unit = {
+    val insertTeacherSQL = "INSERT INTO Teacher (FirstName, LastName) VALUES (?, ?)";
+  val teacherStatement = connection.prepareStatement(insertTeacherSQL,Statement.RETURN_GENERATED_KEYS)
+      teacherStatement.setString(1, firstName);
+      teacherStatement.setString(2, lastName);
+      teacherStatement.executeUpdate();
+
+      val generatedKeys = teacherStatement.getGeneratedKeys;
+      var teacherId = -1;
+      if (generatedKeys.next()) {
+        teacherId = generatedKeys.getInt(1);
+      }
+
+      // Insert into Course table with the assigned teacherId
+      val insertCourseSQL = "INSERT INTO Course (CourseName, TeacherID) VALUES (?, ?)";
+    val courseStatement = connection.prepareStatement(insertCourseSQL)
+        courseStatement.setString(1, courseName);
+        courseStatement.setInt(2, teacherId);
+        courseStatement.executeUpdate();
+
+
+
+
   }
 
-  def deleteLineFromFile(id: Int): Unit = {
-    val filePath = "teachers.txt"
-    val source = Source.fromFile(filePath)
-    val lines = source.getLines().filterNot { line =>
-      val recordFields = line.split(",")
-      val teacherId = recordFields(0).toInt
-      id == teacherId
-    }.toList
-    source.close()
 
-    val writer = new PrintWriter(new File(filePath))
-    lines.foreach(writer.println)
-    writer.close()
+  def destroy(id: Int): Unit = {
+    val deleteStudentQuery = "DELETE FROM Student WHERE StudentID = ?"
+
+    val preparedStatement = connection.prepareStatement(deleteStudentQuery)
+
+    // Set value for the prepared statement
+    preparedStatement.setInt(1, id)
+
+    // Execute the delete query
+    val rowsAffected = preparedStatement.executeUpdate()
+
+    // Check if the deletion was successful
+    if (rowsAffected > 0) {
+      println("Student deleted successfully!")
+    } else {
+      println(s"No student found with StudentID: $id")
+    }
+
   }
 
-  def update(id: Int, name: String, subject: String): Unit = {
-    deleteLineFromFile(id)
-    create(id, name, subject)
-    println("\nTeacher Updated Successfully")
+  def update(id: Int, firstName: String, lastName: String): Unit = {
+    val updateStudentQuery = "UPDATE Student SET FirstName = ?, LastName = ? WHERE StudentID = ?"
+    var preparedStatement = connection.prepareStatement(updateStudentQuery)
+    preparedStatement.setString(1, firstName)
+    preparedStatement.setString(2, lastName)
+    preparedStatement.setString(3, id.toString)
+
+    val rowsAffected = preparedStatement.executeUpdate()
+
+    // Check if the update was successful
+    if (rowsAffected > 0) {
+      println("Teacher updated successfully!")
+    } else {
+      println(s"No teacher found with TeacherID: $id")
+
+    }
   }
 
   def createNewTeacherWindow(): Unit = {
-    println("Please enter teacher name: ")
-    val name = scala.io.StdIn.readLine()
-    println("Please enter teacher subject: ")
-    val subject = scala.io.StdIn.readLine()
+    println("Please enter teacher first name: ")
+    val firstName = scala.io.StdIn.readLine()
+    println("Please enter teacher last name : ")
+    val lastName = scala.io.StdIn.readLine()
+    println("Please enter the taught subject : ")
+    val courseName = scala.io.StdIn.readLine()
     this.id += 1
-    create(this.id, name, subject)
+    create(firstName, lastName,courseName)
   }
 
   def readTeacherWindow(): Unit = {
@@ -111,16 +150,16 @@ object Teacher {
   def updateTeacherWindow(): Unit = {
     println("Please enter teacher id: ")
     val id = scala.io.StdIn.readLine().toInt
-    println("Please enter teacher name: ")
-    val name = scala.io.StdIn.readLine()
-    println("Please enter teacher subject: ")
-    val subject = scala.io.StdIn.readLine()
-    update(id, name, subject)
+    println("Please enter teacher first name: ")
+    val fname = scala.io.StdIn.readLine()
+    println("Please enter teacher last name: ")
+    val lsubject = scala.io.StdIn.readLine()
+    update(id, fname, lsubject)
   }
 
   def deleteTeacherWindow(): Unit = {
     println("Please enter teacher id: ")
     val id: Int = scala.io.StdIn.readLine().toInt
-    deleteLineFromFile(id)
+    destroy(id)
   }
 }
