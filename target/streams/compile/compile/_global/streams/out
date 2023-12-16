@@ -1,0 +1,13 @@
+[0m[[0m[31merror[0m] [0m[0mC:\Users\Mohamed\IdeaProjects\SQL Project\src\main\scala\Testing.scala:39:5: ';' expected but ',' found.[0m
+[0m[[0m[31merror[0m] [0m[0m    ,[0m
+[0m[[0m[31merror[0m] [0m[0m    ^[0m
+[0m[[0m[31merror[0m] [0m[0mC:\Users\Mohamed\IdeaProjects\SQL Project\src\main\scala\Testing.scala:137:1: expected class or object definition[0m
+[0m[[0m[31merror[0m] [0m[0mval db = Database.forConfig("h2mem1")[0m
+[0m[[0m[31merror[0m] [0m[0m^[0m
+[0m[[0m[31merror[0m] [0m[0mC:\Users\Mohamed\IdeaProjects\SQL Project\src\main\scala\Testing.scala:140:1: expected class or object definition[0m
+[0m[[0m[31merror[0m] [0m[0mval createTablesAction = (TableQuery[Students].schema ++[0m
+[0m[[0m[31merror[0m] [0m[0m^[0m
+[0m[[0m[31merror[0m] [0m[0mC:\Users\Mohamed\IdeaProjects\SQL Project\src\main\scala\Testing.scala:146:1: expected class or object definition[0m
+[0m[[0m[31merror[0m] [0m[0mdb.run(createTablesAction).onComplete {[0m
+[0m[[0m[31merror[0m] [0m[0m^[0m
+[0m[[0m[31merror[0m] [0m[0mfour errors found[0m

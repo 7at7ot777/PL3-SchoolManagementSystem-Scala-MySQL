@@ -1,0 +1,56 @@
+-- Create Teacher Table
+CREATE TABLE Teacher (
+    TeacherID INT PRIMARY KEY AUTO_INCREMENT,
+    FirstName VARCHAR(50),
+    LastName VARCHAR(50)
+    -- Add other teacher-related fields as needed
+);
+
+-- Create Course Table
+CREATE TABLE Course (
+    CourseID INT PRIMARY KEY AUTO_INCREMENT,
+    CourseName VARCHAR(100),
+    TeacherID INT,
+    FOREIGN KEY (TeacherID) REFERENCES Teacher(TeacherID)
+    -- Add other course-related fields as needed
+);
+
+-- Create Student Table
+CREATE TABLE Student (
+    StudentID INT PRIMARY KEY AUTO_INCREMENT,
+    FirstName VARCHAR(50),
+    LastName VARCHAR(50)
+    -- Add other student-related fields as needed
+);
+
+-- Create Exam Table
+CREATE TABLE Exam (
+    ExamID INT PRIMARY KEY AUTO_INCREMENT,
+    CourseID INT,
+    ExamDate DATE,
+    FOREIGN KEY (CourseID) REFERENCES Course(CourseID)
+    -- Add other exam-related fields as needed
+);
+
+-- Create Attendance Table
+CREATE TABLE Attendance (
+    AttendanceID INT PRIMARY KEY AUTO_INCREMENT,
+    StudentID INT,
+    CourseID INT,
+    Date DATE,
+    Status ENUM('Present', 'Absent'),
+    FOREIGN KEY (StudentID) REFERENCES Student(StudentID),
+    FOREIGN KEY (CourseID) REFERENCES Course(CourseID)
+    -- Add other attendance-related fields as needed
+);
+
+-- Create Grade Table
+CREATE TABLE Grade (
+    GradeID INT PRIMARY KEY AUTO_INCREMENT,
+    StudentID INT,
+    ExamID INT,
+    GradeValue VARCHAR(2),
+    FOREIGN KEY (StudentID) REFERENCES Student(StudentID),
+    FOREIGN KEY (ExamID) REFERENCES Exam(ExamID)
+    -- Add other grade-related fields as needed
+);
