@@ -21,10 +21,6 @@ class StudentActor extends Actor with ActorLogging {
       log.info(s"Student grades displayed")
 
     case ReadStudent(id) =>
-//      val result = Student.read(id) match {
-//        case arr: Array[String] => arr
-//        case _ => Array("0", "No Name", "No Grade")
-//      }
       Student.read(id)
       log.info(s"Student with ID $id has beean read")
 

@@ -91,7 +91,10 @@ object Teacher {
 
 
   def destroy(id: Int): Unit = {
-    val deleteStudentQuery = "DELETE FROM Student WHERE StudentID = ?"
+    var disableForeignKeyChecks = connection.prepareStatement("SET foreign_key_checks = 0")
+
+      disableForeignKeyChecks.execute();
+    val deleteStudentQuery = "DELETE FROM teacher WHERE TeacherID = ?"
 
     val preparedStatement = connection.prepareStatement(deleteStudentQuery)
 
@@ -111,7 +114,7 @@ object Teacher {
   }
 
   def update(id: Int, firstName: String, lastName: String): Unit = {
-    val updateStudentQuery = "UPDATE Student SET FirstName = ?, LastName = ? WHERE StudentID = ?"
+    val updateStudentQuery = "UPDATE teacher SET FirstName = ?, LastName = ? WHERE TeacherID = ?"
     var preparedStatement = connection.prepareStatement(updateStudentQuery)
     preparedStatement.setString(1, firstName)
     preparedStatement.setString(2, lastName)

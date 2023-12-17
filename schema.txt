@@ -54,3 +54,6 @@ CREATE TABLE Grade (
     FOREIGN KEY (ExamID) REFERENCES Exam(ExamID)
     -- Add other grade-related fields as needed
 );
+
+
+SET foreign_key_checks = 0;
