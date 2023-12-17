@@ -1,7 +1,7 @@
 import akka.actor.{Actor, ActorLogging}
 
 // Define messages for communication
-case class CreateExam(id: Int, subject: String, date: String)
+case class CreateExam()
 case class ReadExam(id: Int)
 case class UpdateExam(id: Int, subject: String, date: String)
 case class DeleteExam(id: Int)
@@ -11,9 +11,9 @@ class ExamActor extends Actor with ActorLogging {
   // Actor state
 
   override def receive: Receive = {
-    case CreateExam(id, subject, date) =>
-      Exam.create(id, subject, date)
-      log.info(s"Exam with ID $id created successfully.")
+    case CreateExam() =>
+      Exam.create()
+      log.info(s"Exam created successfully.")
 
     case ReadExam(id) =>
       Exam.read(id)
@@ -24,7 +24,7 @@ class ExamActor extends Actor with ActorLogging {
       log.info(s"Exam with ID $id updated successfully.")
 
     case DeleteExam(id) =>
-      Exam.deleteLineFromFile(id)
+      Exam.destroy(id)
       log.info(s"Exam with ID $id deleted successfully.")
 
     case IndexExams() =>

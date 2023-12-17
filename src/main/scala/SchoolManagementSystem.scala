@@ -207,7 +207,7 @@ object SchoolManagementSystem extends App {
 
       choice match {
         case 1 =>
-          examActor ! Exam.createNewExamWindow()
+          examActor ! Exam.create()
 
         case 2 =>
           println("Please enter exam id:")

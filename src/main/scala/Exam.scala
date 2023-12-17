@@ -1,3 +1,5 @@
+import SchoolManagementSystem.connection
+
 import java.io.{File, FileWriter, PrintWriter}
 import scala.io.Source
 import scala.util.control.Breaks.break
@@ -6,66 +8,122 @@ object Exam {
   private var id: Int = 0
 
   def index(): Unit = {
-    val filePath = "exams.txt"
-    val source = Source.fromFile(filePath)
+    val query =
+      """
+        |SELECT Exam.ExamID, Course.CourseName, Exam.ExamDate
+        |FROM Exam
+        |JOIN Course ON Exam.CourseID = Course.CourseID;
+        |""".stripMargin
 
+    val preparedStatement = connection.prepareStatement(query)
+    val resultSet = preparedStatement.executeQuery()
 
-      println("Exams Index:")
-      for (line <- source.getLines()) {
-        val recordFields = line.split(",")
-        println(s"ID: ${recordFields(0)}, Course Name: ${recordFields(1)}, Exam Date: ${recordFields(2)}")
-      }
+    while (resultSet.next()) {
+      val examID = resultSet.getInt("ExamID")
+      val courseName = resultSet.getString("CourseName")
+      val examDate = resultSet.getDate("ExamDate")
+
+      println(s"ExamID: $examID, CourseName: $courseName, ExamDate: $examDate")
+    }
+
 
   }
 
   def read(id: Int): Any = {
 
-    val source = Source.fromFile("exams.txt")
-    var flag = 0
-    for (line <- source.getLines()) {
-      // Assuming records are comma-separated values
-      val recordFields = line.split(",")
+        val query =
+          """
+            |SELECT Exam.ExamID, Course.CourseName, Exam.ExamDate
+            |FROM Exam
+            |JOIN Course ON Exam.CourseID = Course.CourseID
+            |WHERE Exam.ExamID = ?;
+            |""".stripMargin
 
-      // Process the fields as needed
-      val examId: Int = recordFields(0).toInt
-      if (id == examId) {
-        flag = 1
-        println(s"Exam with ID $id: ID=${recordFields(0)}, Name=${recordFields(1)}, Grade=${recordFields(2)}")
-        source.close()
-        break
+        val preparedStatement = connection.prepareStatement(query)
+        preparedStatement.setInt(1, id)
+
+        val resultSet = preparedStatement.executeQuery()
+
+        while (resultSet.next()) {
+          val examID = resultSet.getInt("ExamID")
+          val courseName = resultSet.getString("CourseName")
+          val examDate = resultSet.getDate("ExamDate")
+
+          println(s"ExamID: $examID, CourseName: $courseName, ExamDate: $examDate")
+        }
       }
 
+
+  def create(): Unit = {
+   Course.index()
+    println("===============")
+    println("Choose course id from the ID's mentioned above")
+    var courseId = scala.io.StdIn.readLine().toInt
+
+    val insertQuery =
+      """
+        |INSERT INTO Exam (CourseID, ExamDate)
+        |VALUES (?, NOW());
+        |""".stripMargin
+
+    val preparedStatement = connection.prepareStatement(insertQuery)
+    preparedStatement.setInt(1, courseId)
+
+    val rowsInserted = preparedStatement.executeUpdate()
+
+    if (rowsInserted > 0) {
+      println("Exam data inserted successfully.")
+    } else {
+      println("Failed to insert exam data.")
     }
-    if (flag == 0) println(s"Exam with id = ${id} is not found")
-    source.close()
   }
 
-  def create(id: Int, course: String, date: String): Unit = {
-    val writer = new FileWriter("exams.txt", true)
-    writer.write(s"$id,$course,$date\n")
-    writer.close()
-    println("Exam Created Successfully")
-  }
+  def destroy(id: Int): Unit = {
+    var disableForeignKeyChecks = connection.prepareStatement("SET foreign_key_checks = 0")
 
-  def deleteLineFromFile(id: Int): Unit = {
-    val filePath = "exams.txt"
-    val source = Source.fromFile(filePath)
-    val lines = source.getLines().filterNot { line =>
-      val recordFields = line.split(",")
-      val examId = recordFields(0).toInt
-      id == examId
-    }.toList
-    source.close()
+    disableForeignKeyChecks.execute();
+    val deleteStudentQuery = "DELETE FROM exam WHERE ExamID = ?"
 
-    val writer = new PrintWriter(new File(filePath))
-    lines.foreach(writer.println)
-    writer.close()
+    val preparedStatement = connection.prepareStatement(deleteStudentQuery)
+
+    // Set value for the prepared statement
+    preparedStatement.setInt(1, id)
+
+    // Execute the delete query
+    val rowsAffected = preparedStatement.executeUpdate()
+
+    // Check if the deletion was successful
+    if (rowsAffected > 0) {
+      println("Teacher deleted successfully!")
+    } else {
+      println(s"No Teacher found with StudentID: $id")
+    }
+
   }
 
   def update(id: Int, course: String, date: String): Unit = {
-    deleteLineFromFile(id)
-    create(id, course, date)
-    println("\nExam Updated Successfully")
+    Course.index()
+    println("===============")
+    println("Choose course id from the ID's mentioned above")
+    var courseId = scala.io.StdIn.readLine().toInt
+    val updateQuery =
+      """
+        |UPDATE Exam
+        |SET CourseID = ?, ExamDate = NOW()
+        |WHERE ExamID = ?;
+        |""".stripMargin
+
+    val preparedStatement = connection.prepareStatement(updateQuery)
+    preparedStatement.setInt(1, courseId)
+    preparedStatement.setInt(2, id)
+
+    val rowsUpdated = preparedStatement.executeUpdate()
+
+    if (rowsUpdated > 0) {
+      println(s"Exam with ExamID $id updated successfully.")
+    } else {
+      println(s"No exam found with ExamID $id.")
+    }
   }
 
   def createNewExamWindow(): Unit = {
@@ -73,8 +131,8 @@ object Exam {
     val course = scala.io.StdIn.readLine()
     println("Please enter exam date: ")
     val date = scala.io.StdIn.readLine()
-    this.id += 1
-    create(this.id, course, date)
+
+    create()
   }
 
   def readExamWindow(): Unit = {
@@ -98,6 +156,6 @@ object Exam {
   def deleteExamWindow(): Unit = {
     println("Please enter exam id: ")
     val id: Int = scala.io.StdIn.readLine().toInt
-    deleteLineFromFile(id)
+    destroy(id)
   }
 }
