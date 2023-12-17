@@ -3,6 +3,7 @@ import akka.actor.{ActorSystem, Props}
 
 import java.io.{File, FileWriter, PrintWriter}
 import java.sql.{Connection, Statement}
+import scala.collection.mutable.ArrayBuffer
 import scala.io.Source
 import scala.util.Using
 import scala.util.control.Breaks.break
@@ -17,15 +18,15 @@ object Student {
 
   val system = ActorSystem("TeacherSystem")
   val studentActor = system.actorOf(Props[StudentActor], "studentActor")
+
   def index(): Unit = {
-    val getAllStudents  = "SELECT * FROM student"
+    val getAllStudents = "SELECT * FROM student"
     val resultSet = statement.executeQuery(getAllStudents)
     println()
-    while(resultSet.next())
-      {
-        println(s"id = ${resultSet.getInt("StudentID")} first name: ${resultSet.getString("FirstName")} ,last name: ${resultSet.getString("LastName")}")
-      }
-      println()
+    while (resultSet.next()) {
+      println(s"id = ${resultSet.getInt("StudentID")} first name: ${resultSet.getString("FirstName")} ,last name: ${resultSet.getString("LastName")}")
+    }
+    println()
   }
 
 
@@ -79,12 +80,12 @@ object Student {
     println("please enter last name ")
     var lastName = scala.io.StdIn.readLine()
     this.id += 1
-    studentActor ! CreateStudent(firstName,lastName)
+    studentActor ! CreateStudent(firstName, lastName)
 
-//    Student.create(this.id, name, grade)
+    //    Student.create(this.id, name, grade)
   }
 
-  def create(firstName: String, lastName: String ): Unit = {
+  def create(firstName: String, lastName: String): Unit = {
 
     val insertStudentQuery = "INSERT INTO Student (FirstName, LastName) VALUES (?, ?)"
     val preparedStatement = connection.prepareStatement(insertStudentQuery)
@@ -102,7 +103,7 @@ object Student {
   def destroy(id: Int): Unit = {
     val deleteStudentQuery = "DELETE FROM Student WHERE StudentID = ?"
 
-   val preparedStatement = connection.prepareStatement(deleteStudentQuery)
+    val preparedStatement = connection.prepareStatement(deleteStudentQuery)
 
     // Set value for the prepared statement
     preparedStatement.setInt(1, id)
@@ -121,10 +122,10 @@ object Student {
 
   def update(id: Int, firstName: String, lastName: String): Unit = {
     val updateStudentQuery = "UPDATE Student SET FirstName = ?, LastName = ? WHERE StudentID = ?"
-    var    preparedStatement = connection.prepareStatement(updateStudentQuery)
-    preparedStatement.setString(1,firstName)
-    preparedStatement.setString(2,lastName)
-    preparedStatement.setString(3,id.toString)
+    var preparedStatement = connection.prepareStatement(updateStudentQuery)
+    preparedStatement.setString(1, firstName)
+    preparedStatement.setString(2, lastName)
+    preparedStatement.setString(3, id.toString)
 
     val rowsAffected = preparedStatement.executeUpdate()
 
@@ -137,7 +138,7 @@ object Student {
 
   }
 
-  def getAllStudentGrades(studentId:Int): Unit = {
+  def getAllStudentGrades(studentId: Int): Unit = {
     val selectGradesQuery =
       """
         |SELECT
@@ -173,6 +174,7 @@ object Student {
     println()
 
   }
+
   def updateStudentWindow(): Unit = {
     println("please enter student id ")
     val id = scala.io.StdIn.readLine().toInt
@@ -182,8 +184,6 @@ object Student {
     val grade = scala.io.StdIn.readLine()
     studentActor ! UpdateStudent(id, name, grade)
   }
-
-
 
 
   def readStudentWindow(): Unit = {
@@ -203,6 +203,24 @@ object Student {
     val id: Int = scala.io.StdIn.readLine().toInt
     this.destroy(id)
 
+  }
+
+  def recordAttendance(studentIds: ArrayBuffer[Int], courseId: Int, status: String): Unit = {
+    val insertQuery =
+      """
+        |INSERT INTO Attendance (StudentID, CourseID, Date, Status)
+        |VALUES (?, ?, NOW(), ?);
+        |""".stripMargin
+
+    val preparedStatement = connection.prepareStatement(insertQuery)
+    for (studentId <- studentIds) {
+      preparedStatement.setInt(1, studentId)
+      preparedStatement.setInt(2, courseId)
+      preparedStatement.setString(3, status)
+      preparedStatement.addBatch()
+      val batchResult = preparedStatement.executeBatch()
+      println(s"Attendance recorded successfully for ${batchResult.sum} students in CourseID $courseId.")
+    }
   }
 }
 

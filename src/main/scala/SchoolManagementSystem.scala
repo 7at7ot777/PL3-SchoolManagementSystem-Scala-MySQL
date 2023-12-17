@@ -1,6 +1,7 @@
 import akka.actor.{ActorSystem, Props}
 
 import java.sql.Connection
+import scala.collection.mutable.ArrayBuffer
 import scala.util.control.Breaks.break
 
 object SchoolManagementSystem extends App {
@@ -49,7 +50,8 @@ object SchoolManagementSystem extends App {
           |4-Delete student
           |5-Show all students
           |6-Get Student Grades
-          |7-To Go Back
+          |7-Record Student Attendance
+          |8-To Go Back
             =============================================================================================""".stripMargin)
 
       choice = scala.io.StdIn.readLine().toInt
@@ -79,6 +81,26 @@ object SchoolManagementSystem extends App {
           val id = scala.io.StdIn.readInt()
           studentActor ! getAllStudentGrades(id)
         case 7
+        =>
+          var myArray = ArrayBuffer[Int]() // Using ArrayBuffer to dynamically manage the size of the array
+
+          println("Enter Student Id's to take Attendance into the array. Enter 0 to stop.")
+
+          var value: Int = 1
+
+          while (value != 0) {
+            print("Enter a Student Id: ")
+            value = scala.io.StdIn.readLine().toInt
+
+            if (value != 0) {
+              myArray += value // Add the value to the array
+            }
+          }
+          println("Enter course id")
+          val id = scala.io.StdIn.readLine().toInt
+          Student.recordAttendance(myArray, id, "Present")
+
+        case 8
         =>
           choice = 0
         case _ =>
@@ -185,7 +207,6 @@ object SchoolManagementSystem extends App {
   }
 
 
-
   def examCruds(): Unit = {
     val system = ActorSystem("ActorSystem")
     val examActor = system.actorOf(Props[ExamActor], "examActor")
@@ -236,15 +257,3 @@ object SchoolManagementSystem extends App {
 
 
 }
-//  Student.create(1, "Mohamed", "1 E3dady")
-//  Student.create(2, "Ahmed", "2 E3dady")//  //  val result: Array[String] = Student.read(5).asInstanceOf[Array[String]]
-//  val result: Array[String] = Student.read(5) match {
-//    case arr: Array[String] => arr
-//    case _ =>Array("0", "No Name", "No Grade")
-//  }
-//  result.foreach(value => println(s"Found value: $value"))
-//  println(s"\nThe result id = ${result(0)} name = ${result(1)} grade is ${result(2)}")
-
-//  Student.deleteLineFromFile(2);
-//
-//  Student.update(1,"Hathout","Kolya")
