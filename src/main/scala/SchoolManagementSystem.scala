@@ -149,37 +149,33 @@ object SchoolManagementSystem extends App {
       println(
         """
           |Please Choose The Operation
-          |1-Create new course
-          |2-Read a course
-          |3-Update course
-          |4-Delete course
-          |5-Show all courses
-          |6-To Go Back
+          |1-Read a course
+          |2-Update course
+          |3-Delete course
+          |4-Show all courses
+          |5-To Go Back
           ========================================================================================================""".stripMargin)
 
       choice = scala.io.StdIn.readLine().toInt
 
       choice match {
         case 1 =>
-          courseActor ! Course.createNewCourseWindow()
-
-        case 2 =>
           println("Please enter course id:")
           val id = scala.io.StdIn.readInt()
           courseActor ! ReadCourse(id)
 
-        case 3 =>
+        case 2 =>
           Course.updateCourseWindow()
 
-        case 4 =>
+        case 3 =>
           println("Please enter course id:")
           val id = scala.io.StdIn.readInt()
           courseActor ! DeleteCourse(id)
 
-        case 5 =>
+        case 4 =>
           courseActor ! IndexCourses()
 
-        case 6 =>
+        case 5 =>
           choice = 0
 
         case _ =>

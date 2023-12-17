@@ -106,9 +106,9 @@ object Teacher {
 
     // Check if the deletion was successful
     if (rowsAffected > 0) {
-      println("Student deleted successfully!")
+      println("Teacher deleted successfully!")
     } else {
-      println(s"No student found with StudentID: $id")
+      println(s"No Teacher found with StudentID: $id")
     }
 
   }
